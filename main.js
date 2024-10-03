@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 let paddleWidth = 100;
 let paddleHeight = 10;
 let paddleX = (canvas.width - paddleWidth) / 2; // Center the paddle
-let paddleY = canvas.height - paddleHeight - 10; // Paddle position
+const paddleSpeed = 7; // Speed of paddle movement
 
 // Ball properties
 let ballRadius = 10;
@@ -15,25 +15,22 @@ let ballY = canvas.height - 30;
 let ballSpeedX = 2;
 let ballSpeedY = -2;
 
-// Function to generate a random angle for the ball's direction
-function getRandomSpeed(min, max) {
-    return Math.random() * (max - min) + min;
-}
+// Player control
+let rightPressed = false;
+let leftPressed = false;
 
-// Function to reset the ball with random speed
+// Function to reset the ball
 function resetBall() {
-    ballX = paddleX + paddleWidth / 2; // Reset ball above the paddle
-    ballY = paddleY - ballRadius;
-
-    // Set random horizontal and vertical speeds
-    ballSpeedX = getRandomSpeed(-3, 3); // Random speed between -3 and 3
-    ballSpeedY = getRandomSpeed(-3, -2); // Ensure ball goes upwards (negative y)
+    ballX = canvas.width / 2; // Reset to the middle
+    ballY = canvas.height - 30; // Near the paddle, above the bottom
+    ballSpeedX = 2; // Reset speed
+    ballSpeedY = -2;
 }
 
 // Draw the paddle
 function drawPaddle() {
     ctx.beginPath();
-    ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
+    ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();
@@ -48,9 +45,42 @@ function drawBall() {
     ctx.closePath();
 }
 
+// Move paddle based on key inputs
+function movePaddle() {
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
+        paddleX += paddleSpeed; // Move paddle right
+    }
+    if (leftPressed && paddleX > 0) {
+        paddleX -= paddleSpeed; // Move paddle left
+    }
+}
+
+// Handle keydown event
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Right" || event.key === "ArrowRight" || event.key === "d") {
+        rightPressed = true;
+    }
+    if (event.key === "Left" || event.key === "ArrowLeft" || event.key === "a") {
+        leftPressed = true;
+    }
+});
+
+// Handle keyup event
+document.addEventListener("keyup", function(event) {
+    if (event.key === "Right" || event.key === "ArrowRight" || event.key === "d") {
+        rightPressed = false;
+    }
+    if (event.key === "Left" || event.key === "ArrowLeft" || event.key === "a") {
+        leftPressed = false;
+    }
+});
+
 function draw() {
     // Clear the canvas to redraw the new frame
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Move the paddle based on key input
+    movePaddle();
 
     // Draw paddle and ball
     drawPaddle();
@@ -58,7 +88,7 @@ function draw() {
 
     // Ball movement
     ballX += ballSpeedX;
-    ballY += ballSpeedY; // Now moving the ball on y-axis too
+    ballY += ballSpeedY;
 
     // Ball collision detection with walls
     // Bounce off the left and right walls
@@ -75,6 +105,24 @@ function draw() {
     if (ballY + ballRadius > canvas.height) {
         console.log("Ball hit the death zone! Resetting ball...");
         resetBall(); // Reset the ball instead of stopping the game
+    }
+
+    // Ball collision detection with the paddle
+    if (ballY + ballRadius > canvas.height - paddleHeight - 10 && // Check if ball is at paddle level
+        ballX > paddleX && // Check if ball is within paddle width
+        ballX < paddleX + paddleWidth) {
+        // Calculate where the ball hits the paddle
+        let hitPosition = (ballX - paddleX) / paddleWidth; // Normalize hit position (0 to 1)
+
+        // Adjust ballSpeedX based on hit position
+        if (hitPosition < 0.5) {
+            ballSpeedX = -2; // Hit the left half of the paddle
+        } else if (hitPosition > 0.5) {
+            ballSpeedX = 2; // Hit the right half of the paddle
+        }
+        
+        ballSpeedY = -ballSpeedY; // Reverse ball direction on y-axis
+        ballY = canvas.height - paddleHeight - 10 - ballRadius; // Position the ball above the paddle
     }
 
     // Keep drawing the scene over and over
