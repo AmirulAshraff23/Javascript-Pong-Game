@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 let paddleWidth = 100;
 let paddleHeight = 10;
 let paddleX = (canvas.width - paddleWidth) / 2; // Center the paddle
-let paddleY = canvas.height - paddleHeight - 10; // Paddle position from the bottom
+let paddleY = canvas.height - paddleHeight - 10; // Paddle position
 
 // Ball properties
 let ballRadius = 10;
@@ -14,6 +14,21 @@ let ballX = canvas.width / 2;
 let ballY = canvas.height - 30;
 let ballSpeedX = 2;
 let ballSpeedY = -2;
+
+// Function to generate a random angle for the ball's direction
+function getRandomSpeed(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+// Function to reset the ball with random speed
+function resetBall() {
+    ballX = paddleX + paddleWidth / 2; // Reset ball above the paddle
+    ballY = paddleY - ballRadius;
+
+    // Set random horizontal and vertical speeds
+    ballSpeedX = getRandomSpeed(-3, 3); // Random speed between -3 and 3
+    ballSpeedY = getRandomSpeed(-3, -2); // Ensure ball goes upwards (negative y)
+}
 
 // Draw the paddle
 function drawPaddle() {
@@ -41,9 +56,9 @@ function draw() {
     drawPaddle();
     drawBall();
 
-    // Move the ball
+    // Ball movement
     ballX += ballSpeedX;
-    ballY += ballSpeedY;
+    ballY += ballSpeedY; // Now moving the ball on y-axis too
 
     // Ball collision detection with walls
     // Bounce off the left and right walls
@@ -58,21 +73,11 @@ function draw() {
 
     // Ball collision detection with bottom (death zone)
     if (ballY + ballRadius > canvas.height) {
-        // Log game over
-        console.log("Ball hit the death zone! Game over.");
-
-        // Reset the ball to be on top of the paddle
-        ballX = paddleX + paddleWidth / 2; // Center on the paddle
-        ballY = paddleY - ballRadius;      // Just above the paddle
-
-        // Optionally reset ball speed to 0
-        ballSpeedX = 0;
-        ballSpeedY = 0;
-
-        return; // Stop the draw loop (optional)
+        console.log("Ball hit the death zone! Resetting ball...");
+        resetBall(); // Reset the ball instead of stopping the game
     }
 
-    // This keeps drawing the scene over and over
+    // Keep drawing the scene over and over
     requestAnimationFrame(draw);
 }
 
