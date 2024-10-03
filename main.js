@@ -6,6 +6,7 @@ const ctx = canvas.getContext("2d");
 let paddleWidth = 100;
 let paddleHeight = 10;
 let paddleX = (canvas.width - paddleWidth) / 2; // Center the paddle
+let paddleY = canvas.height - paddleHeight - 10; // Paddle position from the bottom
 
 // Ball properties
 let ballRadius = 10;
@@ -17,7 +18,7 @@ let ballSpeedY = -2;
 // Draw the paddle
 function drawPaddle() {
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+    ctx.rect(paddleX, paddleY, paddleWidth, paddleHeight);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();
@@ -40,11 +41,11 @@ function draw() {
     drawPaddle();
     drawBall();
 
-    // Move the ball (you can add the logic to animate it later)
+    // Move the ball
     ballX += ballSpeedX;
-    /*ballY += ballSpeedY;*/
+    ballY += ballSpeedY;
 
-     // Ball collision detection with walls
+    // Ball collision detection with walls
     // Bounce off the left and right walls
     if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
         ballSpeedX = -ballSpeedX; // Reverse ball direction on x-axis
@@ -56,11 +57,18 @@ function draw() {
     }
 
     // Ball collision detection with bottom (death zone)
-    // Check if the ball hits the red bottom border (death zone)
     if (ballY + ballRadius > canvas.height) {
-        // Stop the ball (or trigger a game over event)
+        // Log game over
         console.log("Ball hit the death zone! Game over.");
-        // You can stop the draw loop or reset the ball here
+
+        // Reset the ball to be on top of the paddle
+        ballX = paddleX + paddleWidth / 2; // Center on the paddle
+        ballY = paddleY - ballRadius;      // Just above the paddle
+
+        // Optionally reset ball speed to 0
+        ballSpeedX = 0;
+        ballSpeedY = 0;
+
         return; // Stop the draw loop (optional)
     }
 
