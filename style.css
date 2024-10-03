@@ -1,0 +1,10 @@
+body {
+    text-align: center;
+    color: black;
+    font-family: Arial, sans-serif;
+}
+
+#gameCanvas {
+    border: 2px solid black; /* Set all borders to black */
+    border-bottom: 2px solid red; /* Override the bottom border to red */
+}
